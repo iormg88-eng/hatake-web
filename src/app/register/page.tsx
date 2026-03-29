@@ -21,16 +21,16 @@ export default function RegisterPage() {
 
     try {
       const res = await api.post("/api/v1/users/sign_up", {
-        name,
-        email,
-        password,
+        user: { name, email, password },
       });
-      Cookies.set("token", res.data.token, { expires: 7 });
+      // API returns "Bearer <token>", strip the prefix before storing
+      const raw: string = res.data.token ?? "";
+      Cookies.set("token", raw.replace(/^Bearer\s+/, ""), { expires: 7 });
       router.push("/dashboard");
     } catch (err: unknown) {
-      const message =
-        (err as { response?: { data?: { error?: string } } })?.response?.data
-          ?.error ?? "登録に失敗しました";
+      const data = (err as { response?: { data?: { errors?: string[] } } })
+        ?.response?.data;
+      const message = data?.errors?.[0] ?? "登録に失敗しました";
       setError(message);
     } finally {
       setLoading(false);

@@ -19,13 +19,17 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const res = await api.post("/api/v1/users/sign_in", { email, password });
-      Cookies.set("token", res.data.token, { expires: 7 });
+      const res = await api.post("/api/v1/users/sign_in", {
+        user: { email, password },
+      });
+      // API returns "Bearer <token>", strip the prefix before storing
+      const raw: string = res.data.token ?? "";
+      Cookies.set("token", raw.replace(/^Bearer\s+/, ""), { expires: 7 });
       router.push("/dashboard");
     } catch (err: unknown) {
-      const message =
-        (err as { response?: { data?: { error?: string } } })?.response?.data
-          ?.error ?? "ログインに失敗しました";
+      const data = (err as { response?: { data?: { errors?: string[] } } })
+        ?.response?.data;
+      const message = data?.errors?.[0] ?? "ログインに失敗しました";
       setError(message);
     } finally {
       setLoading(false);
