@@ -1,36 +1,40 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Hatake（畑）
 
-## Getting Started
+農業チーム向けの圃場状態共有Webアプリ。
 
-First, run the development server:
+**→ [https://hatake-web.vercel.app](https://hatake-web.vercel.app)**
 
+## 開発背景
+長ネギ13ha・6年の農業現場経験から生まれたプロダクト。
+圃場確認後の情報共有が電話・LINEに頼りがちで、病害虫の発生や生育異常をチームに素早く伝える手段がないという課題を解決する。
+
+## 技術スタック
+- Next.js 14（App Router）
+- TypeScript
+- Tailwind CSS
+- axios / js-cookie
+
+## 主な機能
+- 「順調・要確認・緊急」3段階のステータス管理
+- 🐛🦠💧🌱✂️🚜 の絵文字タグで状況の種類を即時共有
+- 120文字メモで補足情報を追加
+- 経過時間表示（24時間以内はHH:MM、以降は○日前）
+- 2日以上未更新の圃場を視覚的にグレーアウト
+- URLで招待、グループ単位で圃場を管理
+
+## 画面構成
+- `/login` `/register` — 認証画面
+- `/dashboard` — グループ作成・参加
+- `/dashboard/fields` — 圃場一覧（メイン画面）
+- `/dashboard/history` — 更新履歴タイムライン
+
+## ローカル起動
 ```bash
+npm install
+cp .env.local.example .env.local
+# NEXT_PUBLIC_API_URL=http://localhost:3001 を設定
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 関連リポジトリ
+- バックエンド: [hatake-api](https://github.com/iormg88-eng/hatake-api)
