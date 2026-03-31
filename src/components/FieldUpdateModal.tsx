@@ -23,8 +23,23 @@ export default function FieldUpdateModal({ field, onClose, onSuccess }: Props) {
   );
   const [tags, setTags] = useState<TagType[]>(field.latest_log?.tags ?? []);
   const [memo, setMemo] = useState(field.latest_log?.memo ?? "");
+  const [photos, setPhotos] = useState<File[]>([]);
+  const [previews, setPreviews] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []);
+    const merged = [...photos, ...files].slice(0, 3);
+    setPhotos(merged);
+    setPreviews(merged.map((f) => URL.createObjectURL(f)));
+  }
+
+  function removePhoto(index: number) {
+    const next = photos.filter((_, i) => i !== index);
+    setPhotos(next);
+    setPreviews(next.map((f) => URL.createObjectURL(f)));
+  }
 
   function toggleTag(tag: TagType) {
     setTags((prev) =>
@@ -37,8 +52,15 @@ export default function FieldUpdateModal({ field, onClose, onSuccess }: Props) {
     setError("");
     setLoading(true);
     try {
-      await api.post("/api/v1/field_logs", {
-        field_log: { field_id: field.id, status, memo, tags },
+      const formData = new FormData();
+      formData.append("field_log[field_id]", String(field.id));
+      formData.append("field_log[status]", status);
+      formData.append("field_log[memo]", memo);
+      tags.forEach((tag) => formData.append("field_log[tags][]", tag));
+      photos.forEach((photo) => formData.append("field_log[photos][]", photo));
+
+      await api.post("/api/v1/field_logs", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
       onSuccess();
     } catch {
@@ -143,6 +165,46 @@ export default function FieldUpdateModal({ field, onClose, onSuccess }: Props) {
               placeholder="状況や対応内容を記入（任意）"
               className="w-full rounded-xl border border-[#c5d9be] px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#4a7c59] focus:border-transparent resize-none"
             />
+          </div>
+
+          {/* Photos */}
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-[#1c2e1a]">写真（最大3枚）</p>
+            {previews.length > 0 && (
+              <div className="flex gap-2">
+                {previews.map((src, i) => (
+                  <div key={i} className="relative">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={src}
+                      alt={`プレビュー${i + 1}`}
+                      className="w-20 h-20 object-cover rounded-lg border border-[#c5d9be]"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removePhoto(i)}
+                      className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-gray-700 text-white rounded-full text-xs flex items-center justify-center leading-none"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            {photos.length < 3 && (
+              <label className="flex items-center gap-2 cursor-pointer w-fit px-4 py-2 border border-dashed border-[#c5d9be] rounded-xl text-sm text-gray-500 hover:border-[#4a7c59] hover:text-[#4a7c59] transition-colors">
+                <span>📷</span>
+                <span>写真を追加</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  multiple
+                  className="hidden"
+                  onChange={handlePhotoChange}
+                />
+              </label>
+            )}
           </div>
 
           <button

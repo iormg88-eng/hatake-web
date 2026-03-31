@@ -232,6 +232,21 @@ export default function FieldsPage() {
                           {log.memo}
                         </p>
                       )}
+
+                      {/* Photos */}
+                      {log?.photo_urls && log.photo_urls.length > 0 && (
+                        <div className="flex gap-1.5 mt-2 ml-4">
+                          {log.photo_urls.map((url, i) => (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              key={i}
+                              src={url}
+                              alt={`写真${i + 1}`}
+                              className="w-14 h-14 object-cover rounded-lg border border-white/60"
+                            />
+                          ))}
+                        </div>
+                      )}
                     </div>
 
                     {/* Right: status badge + time */}

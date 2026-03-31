@@ -160,6 +160,21 @@ export default function HistoryPage() {
                           {log.memo}
                         </p>
                       )}
+
+                      {log.photo_urls && log.photo_urls.length > 0 && (
+                        <div className="flex gap-2 flex-wrap pt-1">
+                          {log.photo_urls.map((url, j) => (
+                            <a key={j} href={url} target="_blank" rel="noopener noreferrer">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={url}
+                                alt={`写真${j + 1}`}
+                                className="w-20 h-20 object-cover rounded-lg border border-gray-100"
+                              />
+                            </a>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                 );

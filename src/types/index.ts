@@ -26,6 +26,7 @@ export type LatestLog = {
   memo: string | null;
   updated_at: string;
   updated_by: string;
+  photo_urls?: string[];
 };
 
 export type Field = {
@@ -43,6 +44,7 @@ export type FieldLog = {
   created_at: string;
   updated_by?: string;
   user?: Pick<User, "id" | "name">;
+  photo_urls?: string[];
 };
 
 export type GroupMember = {
