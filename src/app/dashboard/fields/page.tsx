@@ -111,7 +111,10 @@ export default function FieldsPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#f5f2ed]">
-        <p className="text-[#4a7c59] text-sm">読み込み中...</p>
+        <div className="text-center space-y-2">
+          <p className="text-[#4a7c59] text-sm">読み込み中...</p>
+          <p className="text-gray-400 text-xs">初回は1分ほどかかる場合があります</p>
+        </div>
       </div>
     );
   }
