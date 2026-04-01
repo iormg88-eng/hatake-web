@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "畑 | 圃場状態共有アプリ",
+  title: "hatake | 圃場状態共有アプリ",
   description: "農業チームのための圃場状態共有アプリ",
 };
 

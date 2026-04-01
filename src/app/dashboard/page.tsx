@@ -63,7 +63,7 @@ export default function DashboardPage() {
       <div className="w-full max-w-sm space-y-6">
         {/* ロゴ */}
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-[#1c2e1a]">🌾 畑</h1>
+          <h1 className="text-3xl font-bold text-[#1c2e1a]">🌾 hatake</h1>
           <p className="text-sm text-[#4a7c59] mt-1">圃場状態共有アプリ</p>
         </div>
 

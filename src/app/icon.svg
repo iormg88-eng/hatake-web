@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="7" fill="#1c2e1a"/>
+  <!-- stem -->
+  <line x1="11" y1="8" x2="11" y2="23" stroke="#7ec89a" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- arch of h -->
+  <path d="M11 16 Q11 11 17 11 Q21 11 21 16 L21 23" fill="none" stroke="#7ec89a" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- small leaf sprout at top of stem -->
+  <path d="M11 10 Q8 7 5 8" fill="none" stroke="#4a7c59" stroke-width="1.5" stroke-linecap="round"/>
+</svg>
