@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Cookies from "js-cookie";
 import api from "@/lib/api";
+import Footer from "@/components/Footer";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -38,7 +39,8 @@ export default function RegisterPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-[#f5f7f2] px-4">
+    <div className="min-h-screen flex flex-col bg-[#f5f7f2]">
+    <main className="flex-1 flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         {/* ロゴ */}
         <div className="text-center mb-8">
@@ -123,5 +125,7 @@ export default function RegisterPage() {
         </form>
       </div>
     </main>
+    <Footer />
+    </div>
   );
 }

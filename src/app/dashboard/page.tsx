@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import api from "@/lib/api";
 import type { Group } from "@/types";
+import Footer from "@/components/Footer";
 
 type Mode = "menu" | "create" | "join";
 
@@ -59,7 +60,8 @@ export default function DashboardPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-[#f5f2ed] px-4">
+    <div className="min-h-screen flex flex-col bg-[#f5f2ed]">
+    <main className="flex-1 flex items-center justify-center px-4">
       <div className="w-full max-w-sm space-y-6">
         {/* ロゴ */}
         <div className="text-center">
@@ -174,5 +176,7 @@ export default function DashboardPage() {
         )}
       </div>
     </main>
+    <Footer />
+    </div>
   );
 }
