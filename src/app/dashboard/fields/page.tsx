@@ -62,6 +62,13 @@ export default function FieldsPage() {
   // Invite token display
   const [showInvite, setShowInvite] = useState(false);
 
+  // Edit field sheet
+  const [editField, setEditField] = useState<Field | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editCrop, setEditCrop] = useState("");
+  const [editLoading, setEditLoading] = useState(false);
+  const [editError, setEditError] = useState("");
+
   const fetchGroup = useCallback(async () => {
     const gid = Cookies.get("hatake_gid");
     if (!gid) { router.replace("/dashboard"); return; }
@@ -77,6 +84,36 @@ export default function FieldsPage() {
   }, [router]);
 
   useEffect(() => { fetchGroup(); }, [fetchGroup]);
+
+  function openEditField(e: React.MouseEvent, field: Field) {
+    e.stopPropagation();
+    setEditField(field);
+    setEditName(field.name);
+    setEditCrop(field.crop ?? "");
+    setEditError("");
+  }
+
+  async function handleEditField(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editField) return;
+    setEditError("");
+    setEditLoading(true);
+    const gid = Cookies.get("hatake_gid");
+    try {
+      await api.patch(`/api/v1/groups/${gid}/fields/${editField.id}`, {
+        field: { name: editName, crop: editCrop || null },
+      });
+      setEditField(null);
+      fetchGroup();
+    } catch (err: unknown) {
+      const msg =
+        (err as { response?: { data?: { errors?: string[] } } })?.response?.data
+          ?.errors?.[0] ?? "更新に失敗しました";
+      setEditError(msg);
+    } finally {
+      setEditLoading(false);
+    }
+  }
 
   async function handleAddField(e: React.FormEvent) {
     e.preventDefault();
@@ -252,7 +289,7 @@ export default function FieldsPage() {
                       )}
                     </div>
 
-                    {/* Right: status badge + time */}
+                    {/* Right: status badge + time + edit */}
                     <div className="flex flex-col items-end gap-1 flex-shrink-0">
                       <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${cfg.bg} ${cfg.text}`}>
                         {cfg.label}
@@ -262,6 +299,13 @@ export default function FieldsPage() {
                           {formatElapsed(log.updated_at)}
                         </span>
                       )}
+                      <button
+                        onClick={(e) => openEditField(e, field)}
+                        className="text-[11px] text-gray-400 hover:text-[#4a7c59] mt-0.5"
+                        title="圃場名・作物を編集"
+                      >
+                        ✏️ 編集
+                      </button>
                     </div>
                   </div>
                 </button>
@@ -323,6 +367,55 @@ export default function FieldsPage() {
                 className="w-full bg-[#1c2e1a] hover:bg-[#2a4028] disabled:opacity-60 text-white font-semibold rounded-xl py-3 text-sm transition-colors"
               >
                 {addLoading ? "追加中..." : "追加する"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit field sheet */}
+      {editField && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setEditField(null)} />
+          <div className="relative z-10 w-full max-w-lg bg-white rounded-t-3xl sm:rounded-2xl p-6 space-y-5">
+            <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto sm:hidden" />
+            <h2 className="text-lg font-bold text-[#1c2e1a]">圃場情報を編集</h2>
+            {editError && (
+              <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-3">
+                {editError}
+              </p>
+            )}
+            <form onSubmit={handleEditField} className="space-y-4">
+              <div className="space-y-1">
+                <label className="block text-sm font-medium text-[#1c2e1a]">
+                  圃場名 <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  required
+                  className="w-full rounded-lg border border-[#c5d9be] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#4a7c59]"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="block text-sm font-medium text-[#1c2e1a]">
+                  作物（任意）
+                </label>
+                <input
+                  type="text"
+                  value={editCrop}
+                  onChange={(e) => setEditCrop(e.target.value)}
+                  placeholder="例：トマト"
+                  className="w-full rounded-lg border border-[#c5d9be] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#4a7c59]"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={editLoading}
+                className="w-full bg-[#1c2e1a] hover:bg-[#2a4028] disabled:opacity-60 text-white font-semibold rounded-xl py-3 text-sm transition-colors"
+              >
+                {editLoading ? "保存中..." : "保存する"}
               </button>
             </form>
           </div>
