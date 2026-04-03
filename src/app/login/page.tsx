@@ -26,6 +26,10 @@ export default function LoginPage() {
       // API returns "Bearer <token>", strip the prefix before storing
       const raw: string = res.data.token ?? "";
       Cookies.set("token", raw.replace(/^Bearer\s+/, ""), { expires: 7 });
+      const groupId = res.data.user?.group_id;
+      if (groupId) {
+        Cookies.set("hatake_gid", String(groupId), { expires: 30 });
+      }
       router.push("/dashboard");
     } catch (err: unknown) {
       const data = (err as { response?: { data?: { errors?: string[] } } })
