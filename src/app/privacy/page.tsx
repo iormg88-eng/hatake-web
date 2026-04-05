@@ -68,7 +68,7 @@ export default function PrivacyPage() {
           </p>
         </section>
 
-        <p className="text-xs text-gray-400">制定日：2025年1月1日</p>
+        <p className="text-xs text-gray-400">制定日：2026年4月1日</p>
 
         <Link href="/" className="block text-sm text-[#4a7c59] hover:underline">
           ← トップへ戻る

@@ -1,12 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useCallback, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Cookies from "js-cookie";
 import api from "@/lib/api";
 import { TAGS } from "@/constants";
-import type { Field, GroupDetail, StatusType } from "@/types";
+import type { Field, GroupDetail, GroupSummary, StatusType, User } from "@/types";
 import FieldUpdateModal from "@/components/FieldUpdateModal";
 
 // ── Design constants ─────────────────────────────────────────────────────────
@@ -46,11 +46,28 @@ function tagEmojis(tags: string[]): string {
 }
 
 // ── Page ──────────────────────────────────────────────────────────────────────
-export default function FieldsPage() {
+export default function FieldsPageWrapper() {
+  return (
+    <Suspense>
+      <FieldsPage />
+    </Suspense>
+  );
+}
+
+function FieldsPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [detail, setDetail] = useState<GroupDetail | null>(null);
+  const [me, setMe] = useState<User | null>(null);
+  const [myGroups, setMyGroups] = useState<GroupSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedField, setSelectedField] = useState<Field | null>(null);
+
+  // Upgrade toast
+  const [showUpgradeToast, setShowUpgradeToast] = useState(false);
+
+  // Group switcher
+  const [showGroupMenu, setShowGroupMenu] = useState(false);
 
   // Add-field sheet
   const [addOpen, setAddOpen] = useState(false);
@@ -73,8 +90,16 @@ export default function FieldsPage() {
     const gid = Cookies.get("hatake_gid");
     if (!gid) { router.replace("/dashboard"); return; }
     try {
-      const res = await api.get<GroupDetail>(`/api/v1/groups/${gid}`);
-      setDetail(res.data);
+      const [groupRes, meRes] = await Promise.all([
+        api.get<GroupDetail>(`/api/v1/groups/${gid}`),
+        api.get<{ user: User }>("/api/v1/me"),
+      ]);
+      setDetail(groupRes.data);
+      setMe(meRes.data.user);
+      if (meRes.data.user.plan === "pro") {
+        const mineRes = await api.get<{ groups: GroupSummary[] }>("/api/v1/groups/mine");
+        setMyGroups(mineRes.data.groups);
+      }
     } catch {
       Cookies.remove("hatake_gid");
       router.replace("/dashboard");
@@ -84,6 +109,19 @@ export default function FieldsPage() {
   }, [router]);
 
   useEffect(() => { fetchGroup(); }, [fetchGroup]);
+
+  useEffect(() => {
+    if (searchParams.get("upgraded") === "true") {
+      setShowUpgradeToast(true);
+      setTimeout(() => setShowUpgradeToast(false), 4000);
+    }
+  }, [searchParams]);
+
+  function switchGroup(gid: number) {
+    Cookies.set("hatake_gid", String(gid), { expires: 30 });
+    setShowGroupMenu(false);
+    window.location.reload();
+  }
 
   function openEditField(e: React.MouseEvent, field: Field) {
     e.stopPropagation();
@@ -170,22 +208,49 @@ export default function FieldsPage() {
 
   return (
     <div className="min-h-screen bg-[#f5f2ed] flex flex-col">
+      {/* Upgrade toast */}
+      {showUpgradeToast && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-[#1c2e1a] text-white text-sm px-5 py-3 rounded-2xl shadow-lg">
+          Proプランへのアップグレードが完了しました 🎉
+        </div>
+      )}
+
       {/* Header */}
       <header className="bg-[#1c2e1a] text-white px-4 py-3 flex items-center justify-between sticky top-0 z-10">
-        <div>
-          <h1 className="text-base font-bold leading-tight">🌾 {group.name}</h1>
+        <div className="relative">
+          {me?.plan === "pro" ? (
+            <button
+              onClick={() => setShowGroupMenu((v) => !v)}
+              className="text-base font-bold leading-tight flex items-center gap-1"
+            >
+              🌾 {group.name}
+              <span className="text-green-300 text-xs">▼</span>
+            </button>
+          ) : (
+            <h1 className="text-base font-bold leading-tight">🌾 {group.name}</h1>
+          )}
+          {showGroupMenu && me?.plan === "pro" && (
+            <div className="absolute top-full left-0 mt-1 w-52 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-20">
+              {myGroups.map((g) => (
+                <button
+                  key={g.id}
+                  onClick={() => switchGroup(g.id)}
+                  className={`w-full text-left px-4 py-3 text-sm hover:bg-[#eef4eb] transition-colors ${String(g.id) === Cookies.get("hatake_gid") ? "font-bold text-[#4a7c59]" : "text-[#1c2e1a]"}`}
+                >
+                  <p className="font-medium">{g.name}</p>
+                  <p className="text-xs text-gray-400">{g.member_count}人・{g.field_count}圃場</p>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
         <nav className="flex items-center gap-3 text-sm">
           <Link href="/dashboard/history" className="text-green-300 hover:text-white">
             履歴
           </Link>
-          <button
-            onClick={() => setShowInvite((v) => !v)}
-            className="text-green-300 hover:text-white"
-            title="招待トークンを表示"
-          >
-            招待
-          </button>
+          <Link href="/dashboard/settings" className="text-green-300 hover:text-white">
+            設定
+          </Link>
           <button onClick={handleLogout} className="text-green-300 hover:text-white">
             ログアウト
           </button>

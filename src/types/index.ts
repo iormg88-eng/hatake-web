@@ -12,6 +12,15 @@ export type User = {
   id: number;
   name: string;
   email: string;
+  plan?: "free" | "pro";
+  group_id?: number | null;
+};
+
+export type GroupSummary = {
+  id: number;
+  name: string;
+  member_count: number;
+  field_count: number;
 };
 
 export type Group = {
