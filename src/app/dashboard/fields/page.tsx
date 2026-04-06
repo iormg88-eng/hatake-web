@@ -69,6 +69,12 @@ function FieldsPage() {
   // Group switcher
   const [showGroupMenu, setShowGroupMenu] = useState(false);
 
+  // New group modal
+  const [showNewGroup, setShowNewGroup] = useState(false);
+  const [newGroupName, setNewGroupName] = useState("");
+  const [newGroupLoading, setNewGroupLoading] = useState(false);
+  const [newGroupError, setNewGroupError] = useState("");
+
   // Add-field sheet
   const [addOpen, setAddOpen] = useState(false);
   const [newName, setNewName] = useState("");
@@ -176,6 +182,26 @@ function FieldsPage() {
     }
   }
 
+  async function handleCreateGroup(e: React.FormEvent) {
+    e.preventDefault();
+    setNewGroupError("");
+    setNewGroupLoading(true);
+    try {
+      const res = await api.post<{ group: { id: number } }>("/api/v1/groups", {
+        group: { name: newGroupName.slice(0, 50) },
+      });
+      Cookies.set("hatake_gid", String(res.data.group.id), { expires: 30 });
+      window.location.reload();
+    } catch (err: unknown) {
+      const msg =
+        (err as { response?: { data?: { errors?: string[] } } })?.response?.data
+          ?.errors?.[0] ?? "グループの作成に失敗しました";
+      setNewGroupError(msg);
+    } finally {
+      setNewGroupLoading(false);
+    }
+  }
+
   function handleLogout() {
     Cookies.remove("token");
     Cookies.remove("hatake_gid");
@@ -241,6 +267,13 @@ function FieldsPage() {
                   <p className="text-xs text-gray-400">{g.member_count}人・{g.field_count}圃場</p>
                 </button>
               ))}
+              <div className="border-t border-gray-100" />
+              <button
+                onClick={() => { setShowGroupMenu(false); setNewGroupName(""); setNewGroupError(""); setShowNewGroup(true); }}
+                className="w-full text-left px-4 py-3 text-sm text-[#4a7c59] hover:bg-[#eef4eb] transition-colors font-medium"
+              >
+                ＋ 新しいグループを作成
+              </button>
             </div>
           )}
         </div>
@@ -484,6 +517,47 @@ function FieldsPage() {
                 className="w-full bg-[#1c2e1a] hover:bg-[#2a4028] disabled:opacity-60 text-white font-semibold rounded-xl py-3 text-sm transition-colors"
               >
                 {editLoading ? "保存中..." : "保存する"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* New group modal */}
+      {showNewGroup && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setShowNewGroup(false)} />
+          <div className="relative z-10 w-full max-w-lg bg-white rounded-t-3xl sm:rounded-2xl p-6 space-y-5">
+            <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto sm:hidden" />
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold text-[#1c2e1a]">新しいグループを作成</h2>
+              <button onClick={() => setShowNewGroup(false)} className="text-gray-400 hover:text-gray-600 text-xl leading-none p-1">✕</button>
+            </div>
+            {newGroupError && (
+              <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-3">{newGroupError}</p>
+            )}
+            <form onSubmit={handleCreateGroup} className="space-y-4">
+              <div className="space-y-1">
+                <label className="block text-sm font-medium text-[#1c2e1a]">
+                  グループ名 <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={newGroupName}
+                  onChange={(e) => setNewGroupName(e.target.value.slice(0, 50))}
+                  required
+                  maxLength={50}
+                  placeholder="例：第2農場チーム"
+                  className="w-full rounded-lg border border-[#c5d9be] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#4a7c59]"
+                />
+                <p className="text-xs text-gray-400 text-right">{newGroupName.length}/50</p>
+              </div>
+              <button
+                type="submit"
+                disabled={newGroupLoading}
+                className="w-full bg-[#1c2e1a] hover:bg-[#2a4028] disabled:opacity-60 text-white font-semibold rounded-xl py-3 text-sm transition-colors"
+              >
+                {newGroupLoading ? "作成中..." : "作成する"}
               </button>
             </form>
           </div>
