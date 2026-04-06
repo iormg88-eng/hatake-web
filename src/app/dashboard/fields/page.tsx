@@ -303,10 +303,13 @@ function FieldsPage() {
               const stale = log ? isStale(log.updated_at) : false;
 
               return (
-                <button
+                <div
                   key={field.id}
+                  role="button"
+                  tabIndex={0}
                   onClick={() => setSelectedField(field)}
-                  className={`w-full text-left rounded-2xl border p-4 transition-all active:scale-[0.99] ${cfg.bg} ${cfg.border} ${stale ? "opacity-60" : ""}`}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setSelectedField(field); }}
+                  className={`w-full text-left rounded-2xl border p-4 transition-all active:scale-[0.99] cursor-pointer ${cfg.bg} ${cfg.border} ${stale ? "opacity-60" : ""}`}
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
@@ -373,7 +376,7 @@ function FieldsPage() {
                       </button>
                     </div>
                   </div>
-                </button>
+                </div>
               );
             })}
           </div>
