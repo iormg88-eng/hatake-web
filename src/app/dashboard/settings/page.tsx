@@ -210,37 +210,65 @@ export default function SettingsPage() {
         </section>
 
         {/* Plan */}
-        <section className="bg-white rounded-2xl border border-[#d6e4d0] p-5 space-y-3">
-          <h2 className="text-sm font-semibold text-[#1c2e1a]">プラン</h2>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium text-[#1c2e1a]">
-                {me.plan === "pro" ? "Pro プラン" : "無料プラン"}
-              </p>
-              {me.plan === "free" && (
-                <p className="text-xs text-gray-400 mt-0.5">圃場10件・1グループまで</p>
-              )}
-              {me.plan === "pro" && (
-                <p className="text-xs text-[#4a7c59] mt-0.5">圃場無制限・複数グループ参加可</p>
-              )}
-            </div>
-            {me.plan === "free" && (
+        {me.plan === "free" ? (
+          <section className="bg-white rounded-2xl border border-[#d6e4d0] p-5 space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-[#1c2e1a]">プラン</h2>
               <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">無料</span>
-            )}
-            {me.plan === "pro" && (
-              <span className="text-xs bg-[#e8f5ee] text-[#4a7c59] px-2 py-0.5 rounded-full font-medium">Pro</span>
-            )}
-          </div>
-          {me.plan === "free" && (
+            </div>
+
+            <div>
+              <p className="text-xs font-medium text-gray-500 mb-2">無料プランでできること</p>
+              <ul className="space-y-1.5">
+                {["圃場10件まで", "メンバー3名まで", "写真アップロード（3枚）", "絵文字タグ・メモ"].map((item) => (
+                  <li key={item} className="flex items-center gap-2 text-sm text-[#1c2e1a]">
+                    <span className="text-[#4a7c59] font-bold">✓</span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="bg-[#e8f5ee] rounded-xl p-4 space-y-2">
+              <p className="text-xs font-medium text-[#4a7c59]">Proプランにアップグレードすると</p>
+              <ul className="space-y-1.5">
+                {["圃場無制限", "メンバー無制限", "複数グループ参加・切り替え"].map((item) => (
+                  <li key={item} className="flex items-center gap-2 text-sm text-[#1c2e1a]">
+                    <span className="text-[#4a7c59]">→</span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
             <button
               onClick={handleUpgrade}
               disabled={upgradeLoading}
               className="w-full bg-[#4a7c59] hover:bg-[#3d6b4a] disabled:opacity-60 text-white font-semibold rounded-xl py-3 text-sm transition-colors"
             >
-              {upgradeLoading ? "リダイレクト中..." : "Pro にアップグレード"}
+              {upgradeLoading ? "リダイレクト中..." : "Proにアップグレード（月額500円）"}
             </button>
-          )}
-        </section>
+          </section>
+        ) : (
+          <section className="bg-white rounded-2xl border border-[#4a7c59] p-5 space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-[#1c2e1a]">プラン</h2>
+              <span className="text-xs bg-[#1c2e1a] text-white px-2.5 py-0.5 rounded-full font-medium">Pro ✓</span>
+            </div>
+
+            <div>
+              <p className="text-xs font-medium text-gray-500 mb-2">Proプランの特典</p>
+              <ul className="space-y-1.5">
+                {["圃場無制限", "メンバー無制限", "複数グループ参加・切り替え", "写真アップロード（3枚）", "絵文字タグ・メモ"].map((item) => (
+                  <li key={item} className="flex items-center gap-2 text-sm text-[#1c2e1a]">
+                    <span className="text-[#4a7c59] font-bold">✓</span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </section>
+        )}
 
         {/* Leave group */}
         <section className="bg-white rounded-2xl border border-red-100 p-5 space-y-3">
